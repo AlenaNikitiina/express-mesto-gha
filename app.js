@@ -21,8 +21,10 @@ app.use('/', usersRouter); // запускаем. передали ф своим
 // app.use('/', cardsRouter);
 
 // подключаемся к серверу mongo
-mongoose.connect('mongodb://localhost:27017/mestodb');
-
+// mongoose.connect('mongodb://localhost:27017/mestodb');
+mongoose.connect('mongodb://127.0.0.1/mestodb')
+  .then(() => console.log('Успешное подключение к MongoDB'))
+  .catch((err) => console.error('Ошибка подключения:', err));
 //
 app.listen(PORT, () => {
   console.log(`app listening on port: ${PORT}`);

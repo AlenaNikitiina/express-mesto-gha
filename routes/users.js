@@ -7,7 +7,4 @@ usersRouter.get('/users', getUsers); // возвращает всех польз
 usersRouter.get('/users/:id', getUser); // возвращает пользователя по _id
 usersRouter.post('/users', createUser); // создаёт пользователя
 
-// usersRouter.patch('/users/me', updateUser); // обновляет профиль
-// usersRouter.patch('/users/me/avatar', updateUserAvatar); // обновляет аватар
-
 module.exports = usersRouter;
