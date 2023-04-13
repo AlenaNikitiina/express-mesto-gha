@@ -12,16 +12,19 @@ const { PORT = 3000 } = process.env;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+// временное решение авторизации
+app.use((req, res, next) => {
+  req.user = {
+    _id: '643862b78194099cf145b31a', // вставьте сюда _id созданного в предыдущем пункте пользователя
+  };
+  next();
+});
 
 // // Здесь роутинг :
-// экпрересс при гет запросе на / выполнит колбэк
-// app.get('/', (req, res) => res.send('hi'));
-
 app.use('/', usersRouter); // запускаем. передали ф своим обработчикам запроса
 // app.use('/', cardsRouter);
 
 // подключаемся к серверу mongo
-// mongoose.connect('mongodb://localhost:27017/mestodb');
 mongoose.connect('mongodb://127.0.0.1/mestodb')
   .then(() => console.log('Успешное подключение к MongoDB'))
   .catch((err) => console.error('Ошибка подключения:', err));
