@@ -1,25 +1,29 @@
 // импортируем
 const express = require('express');
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const router = require('./routes');
-// const mongoose = require('mongoose');
 
-const PORT = 3000; //
+const usersRouter = require('./routes/users');
+// const cardsRouter = require('./routes/cards');
+
+// //
 const app = express(); // создаем приложение
-
-// mongoose.connect('mongodb://localhost:27017/mestodb');
+const { PORT = 3000 } = process.env;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(router);
+// // Здесь роутинг :
+// экпрересс при гет запросе на / выполнит колбэк
+// app.get('/', (req, res) => res.send('hi'));
 
-// экпрересс при гет запросе на /выполнит колбэк
-app.get('/', (req, res) => {
-  res.send('hi');
-});
+app.use('/', usersRouter); // запускаем. передали ф своим обработчикам запроса
+// app.use('/', cardsRouter);
 
-// запускаем сервер
+// подключаемся к серверу mongo
+mongoose.connect('mongodb://localhost:27017/mestodb');
+
+//
 app.listen(PORT, () => {
-  console.log(`Ссылка на сервер: ${PORT}`); // `Ссылка на сервер: ${PORT}`
+  console.log(`app listening on port: ${PORT}`);
 });

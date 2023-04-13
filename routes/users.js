@@ -1,7 +1,13 @@
-const usersRouter = require('express').Router(); // общий обработчик
-const { createUser } = require('../controllers/users');
+// это файл маршрутa user, сюда приходят запросы от пользователей
+const usersRouter = require('express').Router(); // создали роутер
+const { createUser, getUser, getUsers } = require('../controllers/users');
 
-usersRouter.post('/', createUser); //  следит ток за юзерами
+//
+usersRouter.get('/users', getUsers); // возвращает всех пользователей. это ф контроллеры она идет в базу данных и возвр челу результат
+usersRouter.get('/users/:id', getUser); // возвращает пользователя по _id
+usersRouter.post('/users', createUser); // создаёт пользователя
 
-// router.use('/cars', cardsRouter );
+// usersRouter.patch('/users/me', updateUser); // обновляет профиль
+// usersRouter.patch('/users/me/avatar', updateUserAvatar); // обновляет аватар
+
 module.exports = usersRouter;
