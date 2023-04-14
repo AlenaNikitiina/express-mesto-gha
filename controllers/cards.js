@@ -1,4 +1,5 @@
-const Card = require('../models/card');
+const Card = require('../models/card'); // модель
+const { BAD_REQUEST, INTERNAL_SERVERE_ERROR } = require('../errors/errors_constants'); // errors
 
 // POST /cards — создаёт карточку
 const createCard = (req, res) => {
@@ -8,9 +9,9 @@ const createCard = (req, res) => {
     .then((card) => res.status(200).send(card))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные', error });
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки.', error });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка' });
       }
     });
 };
@@ -19,8 +20,8 @@ const createCard = (req, res) => {
 const getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch(() => {
-      res.status(500).send({ message: 'Произошла ошибка' });
+    .catch((error) => {
+      res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Переданы некорректные данные при возврате карточки.', error });
     });
 };
 
@@ -37,9 +38,9 @@ const likeCard = (req, res) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные', error });
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.', error });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка' });
       }
     });
 };
@@ -55,9 +56,9 @@ const dislikeCard = (req, res) => {
     .then((like) => res.send({ data: like }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные 222', error });
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при снятии лайка.', error });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка 22' });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка 22' });
       }
     });
 };
@@ -69,9 +70,9 @@ const deleteCard = (req, res) => {
     .then((card) => res.status(200).send({ data: card }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные 222', error });
+        res.status(BAD_REQUEST).send({ message: 'Карточка с указанным _id не найдена.', error });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка 22' });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка 22' });
       }
     });
 };

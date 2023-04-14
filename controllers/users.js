@@ -1,4 +1,5 @@
 const User = require('../models/user'); // модель
+const { BAD_REQUEST, INTERNAL_SERVERE_ERROR } = require('../errors/errors_constants'); // errors
 
 // создаёт пользователя. post('/users', createUser)
 const createUser = (req, res) => {
@@ -9,9 +10,9 @@ const createUser = (req, res) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные 111', error });
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.', error });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка 11' });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка' });
       }
     });
 };
@@ -19,17 +20,17 @@ const createUser = (req, res) => {
 // возвращает пользователя по _id. get('/users/:id', getUser)
 const getUser = (req, res) => {
   User.findById(req.params.userId)
-    // .orFail(() => {
-    // throw new Error('user not found');
-    // })
+    .orFail(() => {
+      throw new Error('user not found');
+    })
     .then((user) => {
       res.status(200).send(user);
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные 222', error });
+        res.status(BAD_REQUEST).send({ message: 'Пользователь по указанному _id не найден.', error });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка 22' });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка 22' });
       }
     });
 };
@@ -40,9 +41,9 @@ const getUsers = (req, res) => {
     .then((users) => res.status(200).send(users))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные 33', error });
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные.', error });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка 33' });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка' });
       }
     });
 };
@@ -56,9 +57,9 @@ const updateUserAvatar = (req, res) => {
     .then((users) => res.send({ data: users }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные 33', error });
+        res.status(BAD_REQUEST).send({ message: ' Переданы некорректные данные при обновлении аватара.', error });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка 33' });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка' });
       }
     });
 };
@@ -72,9 +73,9 @@ const updateUser = (req, res) => {
     .then((users) => res.send({ data: users }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные 33', error });
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.', error });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка 33' });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка' });
       }
     });
 };
