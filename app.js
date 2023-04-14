@@ -2,7 +2,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const process = require('process');
 
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
@@ -20,10 +19,6 @@ app.use((req, res, next) => {
     _id: '643862b78194099cf145b31a', // _id созданного юзера
   };
   next();
-});
-
-process.on('uncaughtException', (err, origin) => {
-  console.log(`${origin} ${err.name} c текстом ${err.message} не была обработана. Обратите внимание!`);
 });
 
 // Здесь роутинг :
