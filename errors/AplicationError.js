@@ -1,5 +1,5 @@
 class AplicationError extends Error {
-  constructor(status = 500, message = 'Внутрення ошибка') {
+  constructor(status = 500, message = 'Внутренняя ошибка сервера.') {
     super();
     this.status = status;
     this.message = message;
