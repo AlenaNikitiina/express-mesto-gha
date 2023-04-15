@@ -44,7 +44,7 @@ const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
     .catch((error) => {
-      if (error.name === 'ValidationError') {
+      if (error.statusCode === 400 || error.name === 'CastError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные.', error });
       } else {
         res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка', error });
@@ -60,7 +60,7 @@ const updateUserAvatar = (req, res) => {
     .orFail(() => { throw new Error('user not found'); })
     .then((users) => res.send({ data: users }))
     .catch((error) => {
-      if (error.name === 'ValidationError') {
+      if (error.statusCode === 400 || error.name === 'CastError') {
         res.status(BAD_REQUEST).send({ message: ' Переданы некорректные данные при обновлении аватара.', error });
       } else {
         res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка', error });
@@ -76,7 +76,7 @@ const updateUser = (req, res) => {
     .orFail(() => { throw new Error('user not found'); })
     .then((users) => res.send({ data: users }))
     .catch((error) => {
-      if (error.name === 'ValidationError') {
+      if (error.statusCode === 400 || error.name === 'CastError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.', error });
       } else {
         res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка', error });
