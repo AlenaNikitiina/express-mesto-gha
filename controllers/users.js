@@ -52,7 +52,7 @@ const getUsers = (req, res) => {
     });
 };
 
-// обновляет аватар - PATCH /users/me/avatar
+// обновляет аватар. - PATCH /users/me/avatar
 const updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
 
