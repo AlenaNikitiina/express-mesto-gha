@@ -11,7 +11,7 @@ const createCard = (req, res) => {
       if (error.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки.', error });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка' });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка', error });
       }
     });
 };
@@ -43,10 +43,10 @@ const likeCard = (req, res) => {
     .catch((error) => {
       if (error.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.', error });
-      } else if (error.statusCode === 404) {
-        res.status(NOT_FOUND).send({ message: 'Добавление лайка с некорректным id карточки' });
+      } else if (typeof error !== 'string') {
+        res.status(NOT_FOUND).send({ message: 'Добавление лайка с некорректным id карточки', error });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка 111' });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка likeCard', error });
       }
     });
 };
@@ -67,10 +67,10 @@ const dislikeCard = (req, res) => {
     .catch((error) => {
       if (error.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при снятии лайка.', error });
-      } else if (error.statusCode === 404) {
-        res.status(NOT_FOUND).send({ message: 'Удаление лайка у карточки с некорректным id' });
+      } else if (typeof error !== 'string') {
+        res.status(NOT_FOUND).send({ message: 'Удаление лайка у карточки с некорректным id', error });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка' });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка', error });
       }
     });
 };
@@ -87,10 +87,10 @@ const deleteCard = (req, res) => {
     .catch((error) => {
       if (error.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Карточка с указанным _id не найдена.', error });
-      } else if (error.statusCode === 404) {
-        res.status(NOT_FOUND).send({ message: 'Удаление карточки с некорректным id' });
+      } else if (typeof error !== 'string') {
+        res.status(NOT_FOUND).send({ message: 'Удаление карточки с некорректным id', error });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка' });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка', error });
       }
     });
 };
