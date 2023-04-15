@@ -44,7 +44,7 @@ const likeCard = (req, res) => {
       console.log("error name: '", error.name, " code=", error.statusCode);
       // console.log("raw error '", error, type = ", typeof error);
       // if (error.name === 'CastError') {
-      if (error.statusCode === 400) {
+      if (error.statusCode === 400 || error.name === 'CastError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.', error });
       // } else if (error.name === 'Error') {
       } else if (error.statusCode === 404) {
