@@ -29,9 +29,9 @@ const getUser = (req, res) => {
       res.status(200).send(user);
     })
     .catch((error) => {
-      if (error.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Пользователь по указанному _id не найден.', error });
-      } else if (typeof error !== 'string') {
+      if (error.statusCode === 400 || error.name === 'CastError') {
+        res.status(BAD_REQUEST).send({ message: 'Пользователь по указанному _id не найjjjjден.', error });
+      } else if (error.statusCode === 404) {
         res.status(BAD_REQUEST).send({ message: 'Получение пользователя с некорректным id', error });
       } else {
         res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка', error });

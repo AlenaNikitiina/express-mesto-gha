@@ -41,8 +41,7 @@ const likeCard = (req, res) => {
       res.send(card); // res.send({ data: card });
     })
     .catch((error) => {
-      console.log("error name: '", error.name, " code=", error.statusCode);
-      // console.log("raw error '", error, type = ", typeof error);
+      // console.log("error name: '", error.name, error.statusCode);
       // if (error.name === 'CastError') {
       if (error.statusCode === 400 || error.name === 'CastError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.', error });
@@ -70,9 +69,9 @@ const dislikeCard = (req, res) => {
     })
     .then((like) => res.send({ data: like }))
     .catch((error) => {
-      if (error.name === 'ValidationError') {
+      if (error.statusCode === 400 || error.name === 'CastError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при снятии лайка.', error });
-      } else if (typeof error !== 'string') {
+      } else if (error.statusCode === 404) {
         res.status(NOT_FOUND).send({ message: 'Удаление лайка у карточки с некорректным id', error });
       } else {
         res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка', error });
@@ -90,9 +89,9 @@ const deleteCard = (req, res) => {
     })
     .then((card) => res.status(200).send({ data: card }))
     .catch((error) => {
-      if (error.name === 'ValidationError') {
+      if (error.statusCode === 400 || error.name === 'CastError') {
         res.status(BAD_REQUEST).send({ message: 'Карточка с указанным _id не найдена.', error });
-      } else if (typeof error !== 'string') {
+      } else if (error.statusCode === 404) {
         res.status(NOT_FOUND).send({ message: 'Удаление карточки с некорректным id', error });
       } else {
         res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка', error });
