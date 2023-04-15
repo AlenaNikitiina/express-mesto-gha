@@ -1,5 +1,5 @@
 const User = require('../models/user'); // модель
-const { BAD_REQUEST, INTERNAL_SERVERE_ERROR, NOT_FOUND } = require('../errors/errors_constants'); // errors
+const { BAD_REQUEST, INTERNAL_SERVERE_ERROR } = require('../errors/errors_constants'); // errors
 
 // создаёт пользователя. post('/users', createUser)
 const createUser = (req, res) => {
@@ -31,8 +31,8 @@ const getUser = (req, res) => {
     .catch((error) => {
       if (error.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Пользователь по указанному _id не найден.', error });
-      } else if (error.statusCode === 404) {
-        res.status(NOT_FOUND).send({ message: 'Получение пользователя с некорректным id', error });
+      } else if (typeof error !== 'string') {
+        res.status(BAD_REQUEST).send({ message: 'Получение пользователя с некорректным id', error });
       } else {
         res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка', error });
       }
