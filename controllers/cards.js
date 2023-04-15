@@ -41,13 +41,15 @@ const likeCard = (req, res) => {
       res.send(card); // res.send({ data: card });
     })
     .catch((error) => {
-      console.log("error name: '", error.name);
-      console.log("raw error '", error, ", type=", typeof error);
-      if (error.name === 'CastError') {
+      console.log("error name: '", error.name, " code=", error.statusCode);
+      // console.log("raw error '", error, type = ", typeof error);
+      // if (error.name === 'CastError') {
+      if (error.statusCode === 400) {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.', error });
-      } else if (error.name === 'Error') {
+      // } else if (error.name === 'Error') {
+      } else if (error.statusCode === 404) {
         // else if (typeof error !== 'string') {
-        res.status(BAD_REQUEST).send({ message: 'Добавление лайка с некорректным id карточки', error });
+        res.status(NOT_FOUND).send({ message: 'Добавление лайка с некорректным id карточки', error });
       } else {
         res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка likeCard', error });
       }
