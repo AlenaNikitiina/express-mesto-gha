@@ -12,7 +12,7 @@ const createUser = (req, res) => {
       if (error.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.', error });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка', error });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
       }
     });
 };
@@ -34,7 +34,7 @@ const getUser = (req, res) => {
       } else if (error.statusCode === 404) {
         res.status(NOT_FOUND).send({ message: 'Получение пользователя с некорректным id', error });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка', error });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
       }
     });
 };
@@ -47,7 +47,7 @@ const getUsers = (req, res) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные.', error });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка', error });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
       }
     });
 };
@@ -66,7 +66,7 @@ const updateUserAvatar = (req, res) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
         res.status(BAD_REQUEST).send({ message: ' Переданы некорректные данные при обновлении аватара.', error });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка при обновлении аватара.', error });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка.', error });
       }
     });
 };
@@ -83,7 +83,7 @@ const updateUser = (req, res) => {
       if (error.statusCode === 400 || error.name === 'CastError' || error.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.', error });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка при обновлении профиля', error });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
       }
     });
 };

@@ -2,13 +2,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { PORT, SERVER_ADDRESS } = require('./config');
 
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
-//
-const app = express(); // создаем приложение
-const { PORT = 3000 } = process.env;
+// создаем приложение
+const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -28,7 +28,7 @@ app.use((req, res) => {
 });
 
 // подключаемся к серверу mongo
-mongoose.connect('mongodb://127.0.0.1/mestodb')
+mongoose.connect(SERVER_ADDRESS)
   .then(() => console.log('Успешное подключение к MongoDB'))
   .catch((err) => console.error('Ошибка подключения:', err));
 
