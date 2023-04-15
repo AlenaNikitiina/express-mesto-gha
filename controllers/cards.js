@@ -46,7 +46,7 @@ const likeCard = (req, res) => {
       } else if (error.statusCode === 404) {
         res.status(NOT_FOUND).send({ message: 'Добавление лайка с некорректным id карточки' });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка' });
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'Произошла ошибка 111' });
       }
     });
 };

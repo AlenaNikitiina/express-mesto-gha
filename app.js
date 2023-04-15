@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
-const NOT_FOUND = require('./errors/errors_constants');
 
 //
 const app = express(); // создаем приложение
@@ -16,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // временное решение авторизации
 app.use((req, res, next) => {
   req.user = {
-    _id: '643862b78194099cf145b31a', // _id созданного юзера
+    _id: '643862b78194099cf145b31a', // _id созданного мной юзера
   };
   next();
 });
@@ -25,7 +24,7 @@ app.use((req, res, next) => {
 app.use('/', usersRouter); // запускаем. передали ф своим обработчикам запроса
 app.use('/', cardsRouter);
 app.use((req, res) => {
-  res.status(NOT_FOUND).send({ message: 'Несуществующая страница' });
+  res.status(404).send({ message: 'Несуществующая страница.' });
 });
 
 // подключаемся к серверу mongo
