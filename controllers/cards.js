@@ -1,5 +1,5 @@
 const Card = require('../models/card'); // модель
-const { BAD_REQUEST, INTERNAL_SERVERE_ERROR, NOT_FOUND } = require('../errors/errors_constants'); // errors
+const { BAD_REQUEST, INTERNAL_SERVERE_ERROR } = require('../errors/errors_constants'); // errors
 
 // POST /cards — создаёт карточку
 const createCard = (req, res) => {
@@ -60,7 +60,7 @@ const dislikeCard = (req, res) => {
   )
     .orFail(() => {
       const error = new Error('Пользователь с некорректным id');
-      // error.statusCode = 404;
+      error.statusCode = 404;
       return error;
     })
     .then((like) => res.send({ data: like }))
@@ -80,7 +80,7 @@ const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .orFail(() => {
       const error = new Error('Пользователь с некорректным id');
-      // error.statusCode = 404;
+      error.statusCode = 404;
       return error;
     })
     .then((card) => res.status(200).send({ data: card }))
