@@ -4,7 +4,7 @@ const cardSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    minLength: 2,
+    minLength: [2, 'Минимальная длина поля "name" - 2'],
     maxLength: 30,
   },
   link: {
@@ -26,7 +26,7 @@ const cardSchema = new mongoose.Schema({
     default: Date.now,
   },
 
-});
+}, { versionKey: false });
 
 const Card = mongoose.model('Card', cardSchema);
 
