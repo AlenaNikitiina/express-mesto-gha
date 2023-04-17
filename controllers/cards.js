@@ -1,7 +1,7 @@
 const Card = require('../models/card'); // модель
 const { BAD_REQUEST, INTERNAL_SERVERE_ERROR, NOT_FOUND } = require('../errors/errors_constants'); // errors
 
-// POST /cards — создаёт карточку
+// создаёт карточку.  POST /cards
 const createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
@@ -16,7 +16,7 @@ const createCard = (req, res) => {
     });
 };
 
-// GET /cards — возвращает все карточки
+// возвращает все карточки.  GET /cards
 const getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
@@ -25,7 +25,7 @@ const getCards = (req, res) => {
     });
 };
 
-// поставить лайк карточке - PUT /cards/:cardId/likes
+// поставить лайк карточке.  PUT /cards/:cardId/likes
 const likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
@@ -55,7 +55,7 @@ const likeCard = (req, res) => {
     });
 };
 
-// убрать лайк с карточки  DELETE /cards/:cardId/likes
+// убрать лайк с карточки.  DELETE /cards/:cardId/likes
 const dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
@@ -79,7 +79,7 @@ const dislikeCard = (req, res) => {
     });
 };
 
-// удаляет карточку по идентификатору  DELETE /cards/:cardId
+// удаляет карточку по идентификатору.  DELETE /cards/:cardId
 const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .orFail(() => {

@@ -1,7 +1,7 @@
 const User = require('../models/user'); // модель
 const { BAD_REQUEST, INTERNAL_SERVERE_ERROR, NOT_FOUND } = require('../errors/errors_constants'); // errors
 
-// создаёт пользователя. post('/users', createUser)
+// создаёт пользователя.  POST('/users', createUser)
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   return User.create({ name, about, avatar })
@@ -17,7 +17,7 @@ const createUser = (req, res) => {
     });
 };
 
-// возвращает пользователя по _id. get('/users/:id', getUser)
+// возвращает пользователя по _id.  GET('/users/:id', getUser)
 const getUser = (req, res) => {
   User.findById(req.params.userId)
     .orFail(() => {
@@ -39,7 +39,7 @@ const getUser = (req, res) => {
     });
 };
 
-// возвращает всех пользователей.  get('/users', getUsers)
+// возвращает всех пользователей.  GET('/users', getUsers)
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
@@ -52,12 +52,12 @@ const getUsers = (req, res) => {
     });
 };
 
-// обновляет аватар. - PATCH /users/me/avatar
+// обновляет аватар.  PATCH /users/me/avatar
 const updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .orFail(() => { throw new Error('user not found'); })
+    .orFail(() => { throw new Error('user not found'); }) // метод moongose
     // .then((users) => res.send({ data: users }))
     .then((user) => {
       res.status(200).send(user);
@@ -71,7 +71,7 @@ const updateUserAvatar = (req, res) => {
     });
 };
 
-// обновляет профиль PATCH /users/me
+// обновляет профиль.  PATCH /users/me
 const updateUser = (req, res) => {
   const { name, about } = req.body;
 
