@@ -5,6 +5,7 @@ const { BAD_REQUEST, INTERNAL_SERVERE_ERROR, NOT_FOUND } = require('../errors/er
 const createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
+
   Card.create({ name, link, owner })
     .then((card) => res.status(200).send(card))
     .catch((error) => {
@@ -38,16 +39,17 @@ const likeCard = (req, res) => {
       return error;
     })
     .then((card) => {
-      res.send(card); // res.send({ data: card });
+      res.send(card); // res.send({ data: card })
     })
     .catch((error) => {
-      // console.log("error name: '", error.name, error.statusCode);
-      // if (error.name === 'CastError') {
+      console.log("error name: '", error.name, error.statusCode);
+      console.log(error.name === 'CastError');
+      console.log(error.name === 'ValidationError');
+      console.log(error.name === 'Пользователь с некорректным id');
+
       if (error.statusCode === 400 || error.name === 'CastError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.', error });
-      // } else if (error.name === 'Error') {
       } else if (error.statusCode === 404) {
-        // else if (typeof error !== 'string') {
         res.status(NOT_FOUND).send({ message: 'Добавление лайка с некорректным id карточки', error });
       } else {
         res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });

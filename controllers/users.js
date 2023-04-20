@@ -1,12 +1,30 @@
+const bcrypt = require('bcryptjs'); // импортируем модуль bcrypt
+const jwt = require('jsonwebtoken'); // импортируем модуль jsonwebtoken
 const User = require('../models/user'); // модель
 const { BAD_REQUEST, INTERNAL_SERVERE_ERROR, NOT_FOUND } = require('../errors/errors_constants'); // errors
 
 // создаёт пользователя.  POST('/users', createUser)
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  return User.create({ name, about, avatar })
+  const {
+    name, about, avatar, email,
+  } = req.body; // password add
+
+  // хешируем пароль
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash, // записываем хеш в базу
+    }))
     .then((user) => {
-      res.status(201).send(user);
+      res.status(201).send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      });
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
@@ -58,9 +76,8 @@ const updateUserAvatar = (req, res) => {
 
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .orFail(() => { throw new Error('user not found'); }) // метод moongose
-    // .then((users) => res.send({ data: users }))
     .then((user) => {
-      res.status(200).send(user);
+      res.status(200).send(user); // .then((users) => res.send({ data: users }))
     })
     .catch((error) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
@@ -88,6 +105,51 @@ const updateUser = (req, res) => {
     });
 };
 
+// Создаём контроллер аутентификации
+// Если почта и пароль совпадают с теми, что есть в базе, чел входит на сайт.
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' }); // создадим токен
+      res.send({ token }); // аутентификация успешна
+    })
+    .catch((error) => {
+      res.status(401).send({ message: error.message });
+    });
+};
+
+/* юыло до
+// Создаём контроллер аутентификации
+// Если почта и пароль совпадают с теми, что есть в базе, чел входит на сайт.
+const login = (req, res) => {
+  const { email, password } = req.body;
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        // пользователь не найден — отклоняем промис. с ошибкой и переходим в catch
+        return Promise.reject(new Error('Неправильные почта или пароль'));
+      }
+      // Если польз найден, проверим пароль: захешируем его и сравним с хешем в базе.
+      // принимает на вход пароль,его хеш. Метод посчитает хеш и сравнит его с тем хешем,
+      // который мы передали вторым аргументом:
+      // сравниваем переданный пароль и хеш из базы. acync
+      return bcrypt.compare(password, user.password);
+    })
+    .then((matched) => {
+      if (!matched) {
+        return Promise.reject(new Error('Неправильные почта или пароль'));
+        //хешине совпали — отклоняем промис
+      }
+      res.send({ message: 'Всё верно!' }); // аутентификация успешна
+    })
+    .catch((error) => {
+      res.status(401).send({ message: error.message });
+    });
+};
+*/
+
 module.exports = {
-  createUser, getUser, getUsers, updateUserAvatar, updateUser,
+  createUser, getUser, getUsers, updateUserAvatar, updateUser, login,
 };

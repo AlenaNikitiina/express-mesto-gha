@@ -6,6 +6,7 @@ const { PORT, SERVER_ADDRESS } = require('./config');
 
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
+// const escape = require('escape-html');
 
 // создаем приложение
 const app = express();
@@ -23,6 +24,10 @@ app.use((req, res, next) => {
 // Здесь роутинг :
 app.use('/', usersRouter); // запускаем. передали ф своим обработчикам запроса
 app.use('/', cardsRouter);
+
+// app.post('/signin', login); // роут для логина
+// app.post('/signup', createUser); // роут для регистрации
+
 app.use((req, res) => {
   res.status(404).send({ message: 'Несуществующая страница.' });
 });
