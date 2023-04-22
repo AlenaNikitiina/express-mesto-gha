@@ -1,9 +1,10 @@
 const bcrypt = require('bcryptjs'); // импортируем модуль bcrypt
 const jwt = require('jsonwebtoken'); // импортируем модуль jsonwebtoken
+
 const User = require('../models/user'); // модель
 const { BAD_REQUEST, INTERNAL_SERVERE_ERROR, NOT_FOUND } = require('../errors/errors_constants'); // errors
 
-// создаёт пользователя.  POST('/users', createUser)
+// создаёт пользователя.  POST('/users', createUser) содержит body
 const createUser = (req, res) => {
   const {
     name, about, avatar, email,
@@ -116,13 +117,16 @@ const login = (req, res) => {
       res.send({ token }); // аутентификация успешна
     })
     .catch((error) => {
-      res.status(401).send({ message: error.message });
+      res.status(401).send({ message: error.message }); // 403 ? неправильных почте и пароле
     });
 };
 
-/* юыло до
+module.exports = {
+  createUser, getUser, getUsers, updateUserAvatar, updateUser, login,
+};
+
+/* было до
 // Создаём контроллер аутентификации
-// Если почта и пароль совпадают с теми, что есть в базе, чел входит на сайт.
 const login = (req, res) => {
   const { email, password } = req.body;
   User.findOne({ email })
@@ -142,6 +146,7 @@ const login = (req, res) => {
         return Promise.reject(new Error('Неправильные почта или пароль'));
         //хешине совпали — отклоняем промис
       }
+      // 500.catch
       res.send({ message: 'Всё верно!' }); // аутентификация успешна
     })
     .catch((error) => {
@@ -149,7 +154,3 @@ const login = (req, res) => {
     });
 };
 */
-
-module.exports = {
-  createUser, getUser, getUsers, updateUserAvatar, updateUser, login,
-};

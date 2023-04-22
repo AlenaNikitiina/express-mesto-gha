@@ -1,26 +1,28 @@
 const bcrypt = require('bcryptjs'); // импортируем модуль bcrypt
 const mongoose = require('mongoose');
+const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    default: 'Жак-Ив Кусто',
     minLength: [2, 'Минимальная длина поля "name" - 2'],
     maxLength: 30,
   },
   about: {
     type: String,
-    required: true,
+    default: 'Исследователь',
     minLength: 2,
     maxLength: 30,
   },
   avatar: {
     type: String,
-    required: true,
+    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
 }, { versionKey: false });
 
 // добавим метод findUserByCredentials схеме пользователя, будет два параметра
+
 userSchema.statics.findUserByCredentials = function (email, password) {
   // попытаемся найти пользователя по почте. // this — это модель User
   return this.findOne({ email })
