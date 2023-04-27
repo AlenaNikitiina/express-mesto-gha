@@ -17,7 +17,7 @@ const createUser = (req, res) => {
       about,
       avatar,
       email,
-      password: hash, // записываем хеш в базу
+      password: hash, // записываем хеш в базу. преобразование данных в строку
     }))
     .then((user) => {
       res.status(201).send({

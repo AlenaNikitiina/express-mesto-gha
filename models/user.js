@@ -19,6 +19,22 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
+  email: {
+    type: String,
+    unique: true,
+    require: true,
+    minLength: 2,
+    validate: {
+      validator(v) {
+        return validator.isEmail(v);
+      },
+      message: 'Неправильный формат почты',
+    },
+  },
+  password: {
+    type: String,
+    require: true,
+  },
 }, { versionKey: false });
 
 // добавим метод findUserByCredentials схеме пользователя, будет два параметра
