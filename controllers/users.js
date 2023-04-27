@@ -7,11 +7,11 @@ const { BAD_REQUEST, INTERNAL_SERVERE_ERROR, NOT_FOUND } = require('../errors/er
 // создаёт пользователя.  POST('/users', createUser) содержит body
 const createUser = (req, res) => {
   const {
-    name, about, avatar, email,
-  } = req.body; // password add
+    name, about, avatar, email, password,
+  } = req.body;
 
   // хешируем пароль
-  bcrypt.hash(req.body.password, 10)
+  bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name,
       about,
@@ -30,10 +30,33 @@ const createUser = (req, res) => {
     .catch((error) => {
       if (error.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.', error });
+      } else if (error.statusCode === 11000 || error.name === 'MongoServerError') {
+        // console.log(error.name);
+        // console.log(error.statusCode);
+        res.status(409).send({ message: 'Пользователь с такими данными уже существует', error });
       } else {
         res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
       }
+      // next(error) так напимат при глобальн обработке
     });
+};
+
+/*
+// возвращает текущего пользователя  GET('users/me', )
+const getCurrentUserMe = (req, res, next) => {
+  User.findById(req.user._id)
+    .orFail(() => {
+      const error = new Error('Пользователь');
+      error.statusCode = 404;
+      return error;
+    })
+    .then((user) => res.send(user))
+    .catch(next);
+};
+*/
+// возвращает текущего пользователя  GET('users/me', )
+const getCurrentUserMe = (req, res) => {
+  res.status(200).send({ message: 'current me' });
 };
 
 // возвращает пользователя по _id.  GET('/users/:id', getUser)
@@ -121,10 +144,12 @@ const login = (req, res) => {
     });
 };
 
+//
 module.exports = {
-  createUser, getUser, getUsers, updateUserAvatar, updateUser, login,
+  createUser, getUser, getUsers, updateUserAvatar, updateUser, login, getCurrentUserMe,
 };
 
+//
 /* было до
 // Создаём контроллер аутентификации
 const login = (req, res) => {
