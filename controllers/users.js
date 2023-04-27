@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken'); // импортируем модуль json
 
 const User = require('../models/user'); // модель
 const { BAD_REQUEST, INTERNAL_SERVERE_ERROR, NOT_FOUND } = require('../errors/errors_constants'); // errors
+const { JWT_SECRET } = require('../config');
 
 // создаёт пользователя.  POST('/users', createUser) содержит body
 const createUser = (req, res) => {
@@ -44,8 +45,10 @@ const createUser = (req, res) => {
 /*
 // возвращает текущего пользователя  GET('users/me', )
 const getCurrentUserMe = (req, res, next) => {
+  console.log(req.user._id);
   User.findById(req.user._id)
     .orFail(() => {
+      console.log(req.user._id);
       const error = new Error('Пользователь');
       error.statusCode = 404;
       return error;
@@ -54,13 +57,27 @@ const getCurrentUserMe = (req, res, next) => {
     .catch(next);
 };
 */
+
 // возвращает текущего пользователя  GET('users/me', )
-const getCurrentUserMe = (req, res) => {
-  res.status(200).send({ message: 'current me' });
+const getCurrentUserMe = (req, res, next) => {
+  console.log('lalalaal', req.user._id);
+  User.findById(req.user._id)
+    .then((user) => {
+      console.log(user, req.user._id);
+      if (!user) {
+        console.log(req.user._id);
+        throw new Error('Пользователь по указанному _id не найден getCurrentUserMe');
+      }
+      return res.send({ data: user });
+    })
+    .catch((error) => {
+      next(error);
+    });
 };
 
 // возвращает пользователя по _id.  GET('/users/:id', getUser)
 const getUser = (req, res) => {
+  console.log(req.user._id);
   User.findById(req.params.userId)
     .orFail(() => {
       const error = new Error('Пользователь с некорректным id');
@@ -72,7 +89,7 @@ const getUser = (req, res) => {
     })
     .catch((error) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Пользователь по указанному _id не найден.', error });
+        res.status(BAD_REQUEST).send({ message: 'Пользователь по указанному _id не найден. getCurrentUserMe', error });
       } else if (error.statusCode === 404) {
         res.status(NOT_FOUND).send({ message: 'Получение пользователя с некорректным id', error });
       } else {
@@ -130,13 +147,13 @@ const updateUser = (req, res) => {
 };
 
 // Создаём контроллер аутентификации
-// Если почта и пароль совпадают с теми, что есть в базе, чел входит на сайт.
+// Если почта и пароль совпадают с теми, что есть в базе, чел входит на сайт
 const login = (req, res) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' }); // создадим токен
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' }); // создадим токен
       res.send({ token }); // аутентификация успешна
     })
     .catch((error) => {

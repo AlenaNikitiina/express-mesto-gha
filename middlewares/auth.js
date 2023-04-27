@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 
+const { JWT_SECRET } = process.env;
+
 // Если предоставлен верный токен, запрос проходит на дальнейшую обработку.
 // Иначе запрос переходит контроллеру, кот возвр клиенту сообщение об ошибке.
 
@@ -17,7 +19,7 @@ module.exports = (req, res, next) => {
 
   // попытаемся верифицировать токен
   try {
-    payload = jwt.verify(token, 'some-secret-key'); // ////////////////////////////////////////////////
+    payload = jwt.verify(token, JWT_SECRET); // ////////////////////////////////////////////////
   } catch (err) {
     return res.status(401).send({ message: 'Необходима авторизация' }); // отправим ошибку, если не получилось
   }

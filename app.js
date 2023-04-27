@@ -8,6 +8,7 @@ const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
 const { createUser, login, getCurrentUserMe } = require('./controllers/users');
+const auth = require('./middlewares/auth');
 
 // const escape = require('escape-html');
 
@@ -16,17 +17,17 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-// временное решение авторизации
+
+/* // временное решение авторизации
 app.use((req, res, next) => {
-  req.user = {
-    _id: '643862b78194099cf145b31a', // _id созданного мной юзера
-  };
+  req.user = {_id: '643862b78194099cf145b31a',};
   next();
 });
+*/
 
 // Здесь роутинг :
-app.use('/', usersRouter); // запускаем. передали ф своим обработчикам запроса
-app.use('/', cardsRouter);
+app.use('/', auth, usersRouter); // запускаем. передали ф своим обработчикам запроса
+app.use('/', auth, cardsRouter);
 app.post('/signin', login); // роут для логина
 app.post('/signup', createUser); // роут для регистрации
 app.get('/me', getCurrentUserMe); // роут возвращает инфу о текущем пользователе
