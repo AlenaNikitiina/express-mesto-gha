@@ -3,7 +3,10 @@ const jwt = require('jsonwebtoken'); // импортируем модуль json
 
 const User = require('../models/user'); // модель
 const { BAD_REQUEST, INTERNAL_SERVERE_ERROR, NOT_FOUND } = require('../errors/errors_constants'); // errors
-// const { JWT_SECRET } = require('../config');
+// const NotFoundError = require('../errors/NotFoundError');
+// const InternalServerError = require('../errors/InternalServerError');
+
+const { JWT_SECRET } = require('../config');
 
 // создаёт пользователя.  POST('/users', createUser) содержит body
 const createUser = (req, res) => {
@@ -37,6 +40,7 @@ const createUser = (req, res) => {
         // console.log(error.statusCode);
         res.status(409).send({ message: 'Пользователь с такими данными уже существует', error });
       } else {
+      // res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
         res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
       }
       // next(error) так напимат при глобальн обработке
@@ -45,16 +49,13 @@ const createUser = (req, res) => {
 
 // возвращает текущего пользователя  GET('users/me')
 const getCurrentUserMe = (req, res, next) => {
-  console.log('me1');
-  const id = req.user._id;
-  console.log('me1', id);
+  // const _id = req.params;
 
-  User.findById(id)
+  User.findById(req.user._id)
     .orFail(() => {
       throw new Error('meme');
     })
     .then((user) => {
-      // console.log('me2');
       res.send(user);
     })
     .catch(next);
@@ -137,7 +138,7 @@ const login = (req, res) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'JWTSECRET', { expiresIn: '7d' }); // создадим токен
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' }); // создадим токен
       res.send({ token }); // аутентификация успешна
     })
     .catch((error) => {

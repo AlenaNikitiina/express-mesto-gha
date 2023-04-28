@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-// const { JWT_SECRET } = process.env;
+const { JWT_SECRET } = require('../config');
 
 // Если предоставлен верный токен, запрос проходит на дальнейшую обработку.
 // Иначе запрос переходит контроллеру, кот возвр клиенту сообщение об ошибке.
@@ -10,7 +10,7 @@ module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
   // убеждаемся, что он есть или начинается с Bearer
-  if (!authorization || !authorization.startWith('Bearer ')) {
+  if (!authorization || !authorization.startsWith('Bearer ')) {
     return res
       .status(401)
       .send({ message: 'Необходима авторизация' }); // no
@@ -22,7 +22,7 @@ module.exports = (req, res, next) => {
 
   // попытаемся верифицировать токен
   try {
-    payload = jwt.verify(token, 'JWTSECRET'); // получилось
+    payload = jwt.verify(token, JWT_SECRET); // получилось
   } catch (err) {
     return res
       .status(401)
@@ -31,5 +31,5 @@ module.exports = (req, res, next) => {
 
   req.user = payload; // записываем пейлоуд в объект запроса
 
-  next(); // пропускаем запрос дальше
+  return next(); // пропускаем запрос дальше
 };

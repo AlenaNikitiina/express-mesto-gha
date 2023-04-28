@@ -19,7 +19,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Здесь роутинг :
+// // Здесь роутинг :
 // роут для логина
 app.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -39,6 +39,7 @@ app.post('/signup', celebrate({
   }),
 }), createUser);
 
+// app.use(auth);// ??????
 app.use('/', auth, usersRouter); // запускаем. передали ф своим обработчикам запроса
 app.use('/', auth, cardsRouter);
 
@@ -52,13 +53,14 @@ app.use(errors());
 // централизованный обработчик ошибок
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err; // если у ошибки нет статуса, выставляем 500
-
+  console.log(err, message);
   res
     .status(statusCode)
     .send({
       // проверяем статус и выставляем сообщение в зависимости от него
-      message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
+      message: statusCode === 500 ? 'На сервере произошла ошибка ЭТА' : message,
     });
+  console.log('aaaa', message);
   next();
 });
 
