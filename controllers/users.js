@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken'); // импортируем модуль json
 
 const User = require('../models/user'); // модель
 const { BAD_REQUEST, INTERNAL_SERVERE_ERROR, NOT_FOUND } = require('../errors/errors_constants'); // errors
-const { JWT_SECRET } = require('../config');
+// const { JWT_SECRET } = require('../config');
 
 // создаёт пользователя.  POST('/users', createUser) содержит body
 const createUser = (req, res) => {
@@ -26,12 +26,13 @@ const createUser = (req, res) => {
         about: user.about,
         avatar: user.avatar,
         email: user.email,
+        // _id: user._id,
       });
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.', error });
-      } else if (error.statusCode === 11000 || error.name === 'MongoServerError') {
+      } else if (error.code === 11000 || error.name === 'MongoServerError') {
         // console.log(error.name);
         // console.log(error.statusCode);
         res.status(409).send({ message: 'Пользователь с такими данными уже существует', error });
@@ -42,42 +43,25 @@ const createUser = (req, res) => {
     });
 };
 
-/*
-// возвращает текущего пользователя  GET('users/me', )
+// возвращает текущего пользователя  GET('users/me')
 const getCurrentUserMe = (req, res, next) => {
-  console.log(req.user._id);
-  User.findById(req.user._id)
-    .orFail(() => {
-      console.log(req.user._id);
-      const error = new Error('Пользователь');
-      error.statusCode = 404;
-      return error;
-    })
-    .then((user) => res.send(user))
-    .catch(next);
-};
-*/
+  console.log('me1');
+  const id = req.user._id;
+  console.log('me1', id);
 
-// возвращает текущего пользователя  GET('users/me', )
-const getCurrentUserMe = (req, res, next) => {
-  console.log('lalalaal', req.user._id);
-  User.findById(req.user._id)
-    .then((user) => {
-      console.log(user, req.user._id);
-      if (!user) {
-        console.log(req.user._id);
-        throw new Error('Пользователь по указанному _id не найден getCurrentUserMe');
-      }
-      return res.send({ data: user });
+  User.findById(id)
+    .orFail(() => {
+      throw new Error('meme');
     })
-    .catch((error) => {
-      next(error);
-    });
+    .then((user) => {
+      // console.log('me2');
+      res.send(user);
+    })
+    .catch(next);
 };
 
 // возвращает пользователя по _id.  GET('/users/:id', getUser)
 const getUser = (req, res) => {
-  console.log(req.user._id);
   User.findById(req.params.userId)
     .orFail(() => {
       const error = new Error('Пользователь с некорректным id');
@@ -89,7 +73,7 @@ const getUser = (req, res) => {
     })
     .catch((error) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Пользователь по указанному _id не найден. getCurrentUserMe', error });
+        res.status(BAD_REQUEST).send({ message: 'Пользователь по указанному _id не найден.in getUser getCurrentUserMe', error });
       } else if (error.statusCode === 404) {
         res.status(NOT_FOUND).send({ message: 'Получение пользователя с некорректным id', error });
       } else {
@@ -153,7 +137,7 @@ const login = (req, res) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' }); // создадим токен
+      const token = jwt.sign({ _id: user._id }, 'JWTSECRET', { expiresIn: '7d' }); // создадим токен
       res.send({ token }); // аутентификация успешна
     })
     .catch((error) => {
