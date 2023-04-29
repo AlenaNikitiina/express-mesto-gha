@@ -2,9 +2,8 @@ const bcrypt = require('bcryptjs'); // импортируем модуль bcryp
 const jwt = require('jsonwebtoken'); // импортируем модуль jsonwebtoken
 
 const User = require('../models/user'); // модель
-const { BAD_REQUEST, INTERNAL_SERVERE_ERROR, NOT_FOUND } = require('../errors/errors_constants'); // errors
+const { BAD_REQUEST, INTERNAL_SERVERE_ERROR } = require('../errors/errors_constants'); // errors
 const NotFoundError = require('../errors/NotFoundError'); // 404
-// const InternalServerError = require('../errors/InternalServerError');
 const BadRequestError = require('../errors/BadRequestError'); // 400
 
 const { JWT_SECRET } = require('../config');
@@ -102,36 +101,41 @@ const getUsers = (req, res) => {
 };
 
 // обновляет аватар.  PATCH /users/me/avatar
-const updateUserAvatar = (req, res) => {
+const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .orFail(() => { throw new Error('user not found'); }) // метод moongose
+    .orFail(() => { throw new NotFoundError('user not found'); })
     .then((user) => {
       res.status(200).send(user); // .then((users) => res.send({ data: users }))
     })
     .catch((error) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: ' Переданы некорректные данные при обновлении аватара.', error });
+        next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
+        // res.status(BAD_REQUEST).send
+        // ({ message: 'Переданы некорректные данные при обновлении аватара.', error });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка.', error });
+        next(error);
+        // res.status(INTERNAL_SERVERE_ERROR).send
+        // ({ message: 'На сервере произошла ошибка.', error });
       }
     });
 };
 
 // обновляет профиль.  PATCH /users/me
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .orFail(() => { throw new Error('user not found'); })
+    .orFail(() => { throw new NotFoundError('user not found'); })
     .then((users) => res.send({ data: users }))
     .catch((error) => {
       // console.log("name error:", error.name, ", code:", error.statusCode);
       if (error.statusCode === 400 || error.name === 'CastError' || error.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.', error });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
+        next(error);
+        // res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере п ошибка', error });
       }
     });
 };
