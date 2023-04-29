@@ -10,7 +10,7 @@ const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
 const { createUser, login } = require('./controllers/users');
-const auth = require('./middlewares/auth');
+// const auth = require('./middlewares/auth');
 // const escape = require('escape-html');
 
 // создаем приложение
@@ -40,8 +40,8 @@ app.post('/signup', celebrate({
 }), createUser);
 
 // app.use(auth);// ??????
-app.use('/', auth, usersRouter); // запускаем. передали ф своим обработчикам запроса
-app.use('/', auth, cardsRouter);
+app.use('/', usersRouter); // запускаем. передали ф своим обработчикам запроса
+app.use('/', cardsRouter);
 
 app.use((req, res) => {
   res.status(404).send({ message: 'Несуществующая страница.' });
@@ -53,14 +53,13 @@ app.use(errors());
 // централизованный обработчик ошибок
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err; // если у ошибки нет статуса, выставляем 500
-  console.log(err, message);
+
   res
     .status(statusCode)
     .send({
       // проверяем статус и выставляем сообщение в зависимости от него
-      message: statusCode === 500 ? 'На сервере произошла ошибка ЭТА' : message,
+      message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
     });
-  console.log('aaaa', message);
   next();
 });
 

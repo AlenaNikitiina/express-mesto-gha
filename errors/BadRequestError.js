@@ -1,10 +1,10 @@
 const { BAD_REQUEST } = require('./errors_constants');
 
-class NotFoundError extends Error {
+class BadRequestError extends Error {
   constructor(message) {
     super(message);
     this.statusCode = BAD_REQUEST;
   }
 }
 
-module.exports = NotFoundError;
+module.exports = BadRequestError;

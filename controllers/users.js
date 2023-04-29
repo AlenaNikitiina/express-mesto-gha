@@ -3,13 +3,14 @@ const jwt = require('jsonwebtoken'); // импортируем модуль json
 
 const User = require('../models/user'); // модель
 const { BAD_REQUEST, INTERNAL_SERVERE_ERROR, NOT_FOUND } = require('../errors/errors_constants'); // errors
-// const NotFoundError = require('../errors/NotFoundError');
+const NotFoundError = require('../errors/NotFoundError'); // 404
 // const InternalServerError = require('../errors/InternalServerError');
+const BadRequestError = require('../errors/BadRequestError'); // 400
 
 const { JWT_SECRET } = require('../config');
 
 // создаёт пользователя.  POST('/users', createUser) содержит body
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -29,31 +30,29 @@ const createUser = (req, res) => {
         about: user.about,
         avatar: user.avatar,
         email: user.email,
-        // _id: user._id,
       });
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.', error });
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
+        // res.status(BAD_REQUEST).send(
+      // { message: 'Переданы некорректные данные при создании пользователя.', error });
       } else if (error.code === 11000 || error.name === 'MongoServerError') {
         // console.log(error.name);
         // console.log(error.statusCode);
         res.status(409).send({ message: 'Пользователь с такими данными уже существует', error });
       } else {
       // res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
+        next(error);
       }
-      // next(error) так напимат при глобальн обработке
     });
 };
 
 // возвращает текущего пользователя  GET('users/me')
 const getCurrentUserMe = (req, res, next) => {
-  // const _id = req.params;
-
   User.findById(req.user._id)
     .orFail(() => {
-      throw new Error('meme');
+      throw new NotFoundError('Пользователь по указанному _id не найден');
     })
     .then((user) => {
       res.send(user);
@@ -62,11 +61,11 @@ const getCurrentUserMe = (req, res, next) => {
 };
 
 // возвращает пользователя по _id.  GET('/users/:id', getUser)
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail(() => {
-      const error = new Error('Пользователь с некорректным id');
-      error.statusCode = 404;
+      const error = new NotFoundError('Пользователь с некорректным id');
+      // error.statusCode = 404;
       return error;
     })
     .then((user) => {
@@ -74,11 +73,17 @@ const getUser = (req, res) => {
     })
     .catch((error) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Пользователь по указанному _id не найден.in getUser getCurrentUserMe', error });
+        next(new BadRequestError('Пользователь по указанному _id не найден.'));
+        // res.status(BAD_REQUEST).send
+        // ({ message: 'Пользователь по указанному _id не найден.', error });
       } else if (error.statusCode === 404) {
-        res.status(NOT_FOUND).send({ message: 'Получение пользователя с некорректным id', error });
+        next(new NotFoundError('Получение пользователя с некорректным id'));
+        // res.status(NOT_FOUND).send
+        // ({ message: 'Получение пользователя с некорректным id', error });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
+        next(error);
+        // res.status(INTERNAL_SERVERE_ERROR).send
+        // ({ message: 'На сервере произошла ошибка', error });
       }
     });
 };
