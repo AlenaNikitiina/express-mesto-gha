@@ -55,9 +55,12 @@ const getCurrentUserMe = (req, res, next) => {
 
 // возвращает пользователя по _id.  GET('/users/:id', getUser)
 const getUser = (req, res, next) => {
+  // const { _id } = req.body;
+  // console.log("getUser:: ", _id);
   User.findById(req.params.userId)
     .orFail(() => {
       const error = new NotFoundError('Пользователь с некорректным id');
+      // error.statusCode = 404;
       return error;
     })
     .then((user) => {
@@ -73,6 +76,27 @@ const getUser = (req, res, next) => {
       }
     });
 };
+
+/*
+  .catch((error) => {
+      if (error.statusCode === 400 || error.name === 'CastError') {
+        res.status(BAD_REQUEST).send
+        ({ message: 'Пользователь по указанному _id не найден.', error });
+      } else if (error.statusCode === 404) {
+        res.status(NOT_FOUND).send({ message: 'Получение пользователя с некорректным id', error });
+      } else {
+        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
+      }
+    });
+
+    .orFail(() => {
+      const error = new NotFoundError('Пользователь с некорректным id');
+      error.statusCode = 404;
+      console.log(error);
+      return error;
+    })
+
+*/
 
 // возвращает всех пользователей.  GET('/users', getUsers)
 const getUsers = (req, res, next) => {
