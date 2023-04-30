@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs'); // импортируем модуль bcryp
 const jwt = require('jsonwebtoken'); // импортируем модуль jsonwebtoken
 
 const User = require('../models/user'); // модель
-const { BAD_REQUEST } = require('../errors/errors_constants'); // errors
 const NotFoundError = require('../errors/NotFoundError'); // 404
 const BadRequestError = require('../errors/BadRequestError'); // 400
 
@@ -34,14 +33,9 @@ const createUser = (req, res, next) => {
     .catch((error) => {
       if (error.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
-        // res.status(BAD_REQUEST).send(
-      // { message: 'Переданы некорректные данные при создании пользователя.', error });
       } else if (error.code === 11000 || error.name === 'MongoServerError') {
-        // console.log(error.name);
-        // console.log(error.statusCode);
         res.status(409).send({ message: 'Пользователь с такими данными уже существует', error });
       } else {
-      // res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
         next(error);
       }
     });
@@ -64,7 +58,6 @@ const getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail(() => {
       const error = new NotFoundError('Пользователь с некорректным id');
-      // error.statusCode = 404;
       return error;
     })
     .then((user) => {
@@ -73,16 +66,10 @@ const getUser = (req, res, next) => {
     .catch((error) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
         next(new BadRequestError('Пользователь по указанному _id не найден.'));
-        // res.status(BAD_REQUEST).send
-        // ({ message: 'Пользователь по указанному _id не найден.', error });
       } else if (error.statusCode === 404) {
         next(new NotFoundError('Получение пользователя с некорректным id'));
-        // res.status(NOT_FOUND).send
-        // ({ message: 'Получение пользователя с некорректным id', error });
       } else {
         next(error);
-        // res.status(INTERNAL_SERVERE_ERROR).send
-        // ({ message: 'На сервере произошла ошибка', error });
       }
     });
 };
@@ -93,11 +80,9 @@ const getUsers = (req, res, next) => {
     .then((users) => res.status(200).send(users))
     .catch((error) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные.', error });
+        next(new BadRequestError('Переданы некорректные данные.'));
       } else {
         next(error);
-        // res.status(INTERNAL_SERVERE_ERROR).
-        // send({ message: 'На сервере произошла ошибка', error });
       }
     });
 };
@@ -107,19 +92,17 @@ const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .orFail(() => { throw new NotFoundError('user not found'); })
+    .orFail(() => {
+      throw new NotFoundError('Пользователь с некорректным id');
+    })
     .then((user) => {
-      res.status(200).send(user); // .then((users) => res.send({ data: users }))
+      res.status(200).send(user); // send({ data: users }))
     })
     .catch((error) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
-        // res.status(BAD_REQUEST).send
-        // ({ message: 'Переданы некорректные данные при обновлении аватара.', error });
       } else {
         next(error);
-        // res.status(INTERNAL_SERVERE_ERROR).send
-        // ({ message: 'На сервере произошла ошибка.', error });
       }
     });
 };
@@ -129,15 +112,16 @@ const updateUser = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .orFail(() => { throw new NotFoundError('user not found'); })
+    .orFail(() => {
+      throw new NotFoundError('Пользователь с некорректным id');
+    })
     .then((users) => res.send({ data: users }))
     .catch((error) => {
       // console.log("name error:", error.name, ", code:", error.statusCode);
       if (error.statusCode === 400 || error.name === 'CastError' || error.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.', error });
+        next(new BadRequestError('Переданы некорректные данные при обновлении профиля.'));
       } else {
         next(error);
-        // res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере п ошибка', error });
       }
     });
 };
