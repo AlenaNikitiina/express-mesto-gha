@@ -1,28 +1,63 @@
-const User = require('../models/user'); // модель
-const { BAD_REQUEST, INTERNAL_SERVERE_ERROR, NOT_FOUND } = require('../errors/errors_constants'); // errors
+const bcrypt = require('bcryptjs'); // импортируем модуль bcrypt
+const jwt = require('jsonwebtoken'); // импортируем модуль jsonwebtoken
 
-// создаёт пользователя.  POST('/users', createUser)
-const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  return User.create({ name, about, avatar })
+const User = require('../models/user'); // модель
+const NotFoundError = require('../errors/NotFoundError'); // 404
+const BadRequestError = require('../errors/BadRequestError'); // 400
+
+const { JWT_SECRET } = require('../config');
+
+// создаёт пользователя.  POST('/users', createUser) содержит body
+const createUser = (req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+
+  // хешируем пароль
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash, // записываем хеш в базу. преобразование данных в строку
+    }))
     .then((user) => {
-      res.status(201).send(user);
+      res.status(201).send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      });
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.', error });
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
+      } else if (error.code === 11000 || error.name === 'MongoServerError') {
+        res.status(409).send({ message: 'Пользователь с такими данными уже существует', error });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
+        next(error);
       }
     });
 };
 
+// возвращает текущего пользователя  GET('users/me')
+const getCurrentUserMe = (req, res, next) => {
+  User.findById(req.user._id)
+    .orFail(() => {
+      throw new NotFoundError('Пользователь по указанному _id не найден');
+    })
+    .then((user) => {
+      res.send(user);
+    })
+    .catch(next);
+};
+
 // возвращает пользователя по _id.  GET('/users/:id', getUser)
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail(() => {
-      const error = new Error('Пользователь с некорректным id');
-      error.statusCode = 404;
+      const error = new NotFoundError('Пользователь с некорректным id');
       return error;
     })
     .then((user) => {
@@ -30,64 +65,83 @@ const getUser = (req, res) => {
     })
     .catch((error) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Пользователь по указанному _id не найден.', error });
+        next(new BadRequestError('Пользователь по указанному _id не найден.'));
       } else if (error.statusCode === 404) {
-        res.status(NOT_FOUND).send({ message: 'Получение пользователя с некорректным id', error });
+        next(new NotFoundError('Получение пользователя с некорректным id'));
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
+        next(error);
       }
     });
 };
 
 // возвращает всех пользователей.  GET('/users', getUsers)
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send(users))
     .catch((error) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные.', error });
+        next(new BadRequestError('Переданы некорректные данные.'));
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
+        next(error);
       }
     });
 };
 
 // обновляет аватар.  PATCH /users/me/avatar
-const updateUserAvatar = (req, res) => {
+const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .orFail(() => { throw new Error('user not found'); }) // метод moongose
-    // .then((users) => res.send({ data: users }))
+    .orFail(() => {
+      throw new NotFoundError('Пользователь с некорректным id');
+    })
     .then((user) => {
-      res.status(200).send(user);
+      res.status(200).send(user); // send({ data: users }))
     })
     .catch((error) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: ' Переданы некорректные данные при обновлении аватара.', error });
+        next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка.', error });
+        next(error);
       }
     });
 };
 
 // обновляет профиль.  PATCH /users/me
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .orFail(() => { throw new Error('user not found'); })
+    .orFail(() => {
+      throw new NotFoundError('Пользователь с некорректным id');
+    })
     .then((users) => res.send({ data: users }))
     .catch((error) => {
       // console.log("name error:", error.name, ", code:", error.statusCode);
       if (error.statusCode === 400 || error.name === 'CastError' || error.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.', error });
+        next(new BadRequestError('Переданы некорректные данные при обновлении профиля.'));
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
+        next(error);
       }
     });
 };
 
+// Создаём контроллер аутентификации
+// Если почта и пароль совпадают с теми, что есть в базе, чел входит на сайт
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' }); // создадим токен
+      res.send({ token }); // аутентификация успешна
+    })
+    .catch((error) => {
+      res.status(401).send({ message: error.message }); // 403 ? неправильных почте и пароле
+    });
+};
+
+//
 module.exports = {
-  createUser, getUser, getUsers, updateUserAvatar, updateUser,
+  createUser, getUser, getUsers, updateUserAvatar, updateUser, login, getCurrentUserMe,
 };
