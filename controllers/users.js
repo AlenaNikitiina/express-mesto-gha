@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs'); // импортируем модуль bcryp
 const jwt = require('jsonwebtoken'); // импортируем модуль jsonwebtoken
 
 const User = require('../models/user'); // модель
-const { BAD_REQUEST, INTERNAL_SERVERE_ERROR } = require('../errors/errors_constants'); // errors
+const { BAD_REQUEST } = require('../errors/errors_constants'); // errors
 const NotFoundError = require('../errors/NotFoundError'); // 404
 const BadRequestError = require('../errors/BadRequestError'); // 400
 
@@ -88,14 +88,16 @@ const getUser = (req, res, next) => {
 };
 
 // возвращает всех пользователей.  GET('/users', getUsers)
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send(users))
     .catch((error) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
         res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные.', error });
       } else {
-        res.status(INTERNAL_SERVERE_ERROR).send({ message: 'На сервере произошла ошибка', error });
+        next(error);
+        // res.status(INTERNAL_SERVERE_ERROR).
+        // send({ message: 'На сервере произошла ошибка', error });
       }
     });
 };
@@ -159,34 +161,3 @@ const login = (req, res) => {
 module.exports = {
   createUser, getUser, getUsers, updateUserAvatar, updateUser, login, getCurrentUserMe,
 };
-
-//
-/* было до
-// Создаём контроллер аутентификации
-const login = (req, res) => {
-  const { email, password } = req.body;
-  User.findOne({ email })
-    .then((user) => {
-      if (!user) {
-        // пользователь не найден — отклоняем промис. с ошибкой и переходим в catch
-        return Promise.reject(new Error('Неправильные почта или пароль'));
-      }
-      // Если польз найден, проверим пароль: захешируем его и сравним с хешем в базе.
-      // принимает на вход пароль,его хеш. Метод посчитает хеш и сравнит его с тем хешем,
-      // который мы передали вторым аргументом:
-      // сравниваем переданный пароль и хеш из базы. acync
-      return bcrypt.compare(password, user.password);
-    })
-    .then((matched) => {
-      if (!matched) {
-        return Promise.reject(new Error('Неправильные почта или пароль'));
-        //хешине совпали — отклоняем промис
-      }
-      // 500.catch
-      res.send({ message: 'Всё верно!' }); // аутентификация успешна
-    })
-    .catch((error) => {
-      res.status(401).send({ message: error.message });
-    });
-};
-*/

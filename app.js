@@ -3,7 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { celebrate, Joi } = require('celebrate'); // ошибки библиотека для валидации данных
-const { errors } = require('celebrate'); // ошибки
+const { errors } = require('celebrate'); // будет обрабатывать ток ошибки, которые сгенерировал celebrate
 const { PORT, SERVER_ADDRESS } = require('./config');
 
 const usersRouter = require('./routes/users');
@@ -39,7 +39,6 @@ app.post('/signup', celebrate({
   }),
 }), createUser);
 
-// app.use(auth);// ??????
 app.use('/', auth, usersRouter); // запускаем. передали ф своим обработчикам запроса
 app.use('/', auth, cardsRouter);
 
@@ -51,13 +50,13 @@ app.use((req, res) => {
 app.use(errors());
 
 // централизованный обработчик ошибок
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err; // если у ошибки нет статуса, выставляем 500
+app.use((error, req, res, next) => {
+  const { statusCode = 500, message } = error; // если у ошибки нет статуса, выставляем 500
   res
     .status(statusCode)
     .send({
       // проверяем статус и выставляем сообщение в зависимости от него
-      message: statusCode === 500 ? 'На сервере произошла ошибка nnn' : message,
+      message: statusCode === 500 ? 'На сервере произошла ошибка из app' : message,
     });
   next();
 });
