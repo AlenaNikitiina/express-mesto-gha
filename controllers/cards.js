@@ -78,6 +78,29 @@ const dislikeCard = (req, res, next) => {
 const deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .orFail(() => {
+      const error = new Error('Чужую карточку нельзя удалитьssss');
+      error.statusCode = 403;
+      return error;
+    })
+    .then((card) => res.status(200).send({ data: card }))
+    .catch((error) => {
+      if (error.statusCode === 400 || error.name === 'CastError') {
+        next(new BadRequestError('Карточка с указанным _id не найдена.'));
+      } else if (error.statusCode === 404) {
+        next(new NotFoundError('Удаление карточки с некорректным id'));
+      } else if (error.statusCode === 403) {
+        res.status(403).send('Чужую карточку нельзя sssудалить');
+      } else {
+        next(error);
+      }
+    });
+};
+
+/* old
+// удаляет карточку по идентификатору.  DELETE /cards/:cardId
+const deleteCard = (req, res, next) => {
+  Card.findByIdAndRemove(req.params.cardId)
+    .orFail(() => {
       throw new NotFoundError('Пользователь с некорректным id');
     })
     .then((card) => res.status(200).send({ data: card }))
@@ -91,7 +114,7 @@ const deleteCard = (req, res, next) => {
       }
     });
 };
-
+*/
 module.exports = {
   getCards, createCard, likeCard, dislikeCard, deleteCard,
 };
