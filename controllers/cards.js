@@ -100,7 +100,7 @@ const deleteCard = (req, res, next) => {
         next(new NotFoundError('Удаление карточки с некорректным id'));
       } else if (error.statusCode === 403) {
         // res.status(403).send({ message: 'Удаление чужой карточки невозможно' });
-        next(new NotFoundError('Удаление чужой карточки невозможно'));
+        next(new OwnerError('Удаление чужой карточки невозможно'));
       } else {
         next(error);
       }
