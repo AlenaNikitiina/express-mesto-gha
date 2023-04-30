@@ -2,6 +2,7 @@ const Card = require('../models/card'); // модель
 
 const NotFoundError = require('../errors/NotFoundError'); // 404
 const BadRequestError = require('../errors/BadRequestError'); // 400
+const OwnerError = require('../errors/OwnerError'); // 403;
 
 // создаёт карточку.  POST /cards
 const createCard = (req, res, next) => {
@@ -76,7 +77,7 @@ const dislikeCard = (req, res, next) => {
 
 // удаляет карточку по идентификатору.  DELETE /cards/:cardId
 const deleteCard = (req, res, next) => {
-  //console.log('deleteCard: ', req.params.cardId);
+  // console.log('deleteCard: ', req.params.cardId);
   Card.findById(req.params.cardId)
   /*
     .orFail(() => {
@@ -100,7 +101,7 @@ const deleteCard = (req, res, next) => {
           })
           .catch(next);
       } else {
-        throw new Error('Чужую карточку нельзя удалить');
+        throw new OwnerError('Удаление чужой карточки невозможно');
       }
     })
     .catch((error) => {
