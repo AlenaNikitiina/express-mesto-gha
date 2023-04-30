@@ -2,7 +2,7 @@ const Card = require('../models/card'); // модель
 
 const NotFoundError = require('../errors/NotFoundError'); // 404
 const BadRequestError = require('../errors/BadRequestError'); // 400
-const OwnerError = require('../errors/OwnerError'); // 403;
+const OwnerError = require('../errors/OwnerError'); // 403
 
 // создаёт карточку.  POST /cards
 const createCard = (req, res, next) => {
@@ -99,7 +99,8 @@ const deleteCard = (req, res, next) => {
       } else if (error.statusCode === 404) {
         next(new NotFoundError('Удаление карточки с некорректным id'));
       } else if (error.statusCode === 403) {
-        res.status(403).send({ message: 'Чужую карточку нельзя sssудалить' });
+        // res.status(403).send({ message: 'Удаление чужой карточки невозможно' });
+        next(new NotFoundError('Удаление чужой карточки невозможно'));
       } else {
         next(error);
       }
