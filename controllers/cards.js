@@ -76,8 +76,9 @@ const dislikeCard = (req, res, next) => {
 
 // удаляет карточку по идентификатору.  DELETE /cards/:cardId
 const deleteCard = (req, res, next) => {
-  console.log("deleteCard: ", req.params.cardId);
+  //console.log('deleteCard: ', req.params.cardId);
   Card.findById(req.params.cardId)
+  /*
     .orFail(() => {
       console.log('orFail');
       throw new Error('Не удалось найти карточку');
@@ -85,8 +86,12 @@ const deleteCard = (req, res, next) => {
       // error.statusCode = 404;
       // return error;
     })
+    */
     // .then((card) => res.status(200).send({ data: card }))
     .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Карточка с указанным _id не найдена.');
+      }
       const ownerId = req.user._id;
       if (req.user._id === ownerId) {
         Card.deleteOne(card)
