@@ -76,13 +76,28 @@ const dislikeCard = (req, res, next) => {
 
 // удаляет карточку по идентификатору.  DELETE /cards/:cardId
 const deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  console.log("deleteCard: ", req.params.cardId);
+  Card.findById(req.params.cardId)
     .orFail(() => {
-      const error = new Error('Чужую карточку нельзя удалитьssss');
-      error.statusCode = 403;
-      return error;
+      console.log('orFail');
+      throw new Error('Не удалось найти карточку');
+      // error.statusCode = 403;
+      // error.statusCode = 404;
+      // return error;
     })
-    .then((card) => res.status(200).send({ data: card }))
+    // .then((card) => res.status(200).send({ data: card }))
+    .then((card) => {
+      const ownerId = req.user._id;
+      if (req.user._id === ownerId) {
+        Card.deleteOne(card)
+          .then(() => {
+            res.status(200).send({ data: card });
+          })
+          .catch(next);
+      } else {
+        throw new Error('Чужую карточку нельзя удалить');
+      }
+    })
     .catch((error) => {
       if (error.statusCode === 400 || error.name === 'CastError') {
         next(new BadRequestError('Карточка с указанным _id не найдена.'));
@@ -96,25 +111,6 @@ const deleteCard = (req, res, next) => {
     });
 };
 
-/* old
-// удаляет карточку по идентификатору.  DELETE /cards/:cardId
-const deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .orFail(() => {
-      throw new NotFoundError('Пользователь с некорректным id');
-    })
-    .then((card) => res.status(200).send({ data: card }))
-    .catch((error) => {
-      if (error.statusCode === 400 || error.name === 'CastError') {
-        next(new BadRequestError('Карточка с указанным _id не найдена.'));
-      } else if (error.statusCode === 404) {
-        next(new NotFoundError('Удаление карточки с некорректным id'));
-      } else {
-        next(error);
-      }
-    });
-};
-*/
 module.exports = {
   getCards, createCard, likeCard, dislikeCard, deleteCard,
 };
