@@ -43,10 +43,8 @@ const likeCard = (req, res, next) => {
       res.send(card); // send({ data: card })
     })
     .catch((error) => {
-      if (error.statusCode === 400 || error.name === 'CastError') {
+      if (error.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные для постановки лайка.'));
-      } else if (error.statusCode === 404) {
-        next(new NotFoundError('Добавление лайка с некорректным id карточки'));
       } else {
         next(error);
       }
@@ -65,10 +63,8 @@ const dislikeCard = (req, res, next) => {
     })
     .then((like) => res.send({ data: like }))
     .catch((error) => {
-      if (error.statusCode === 400 || error.name === 'CastError') {
+      if (error.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные при снятии лайка.'));
-      } else if (error.statusCode === 404) {
-        next(new NotFoundError('Удаление лайка у карточки с некорректным id'));
       } else {
         next(error);
       }
@@ -94,13 +90,8 @@ const deleteCard = (req, res, next) => {
       }
     })
     .catch((error) => {
-      if (error.statusCode === 400 || error.name === 'CastError') {
+      if (error.name === 'CastError') {
         next(new BadRequestError('Карточка с указанным _id не найдена.'));
-      } else if (error.statusCode === 404) {
-        next(new NotFoundError('Удаление карточки с некорректным id'));
-      } else if (error.statusCode === 403) {
-        // res.status(403).send({ message: 'Удаление чужой карточки невозможно' });
-        next(new OwnerError('Удаление чужой карточки невозможно'));
       } else {
         next(error);
       }
