@@ -5,7 +5,6 @@ const User = require('../models/user'); // модель
 const NotFoundError = require('../errors/NotFoundError'); // 404
 const BadRequestError = require('../errors/BadRequestError'); // 400
 const ConflictError = require('../errors/ConflictError'); // 409
-const UnauthorizedError = require('../errors/UnauthorizedError'); // 401
 
 const { JWT_SECRET } = require('../config');
 
@@ -130,10 +129,16 @@ const login = (req, res, next) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' }); // создадим токен
       res.send({ token }); // аутентификация успешна
     })
-    .catch(() => {
-      next(new UnauthorizedError('Необходима авторизация')); // неправильных почте и пароле
+    .catch((error) => {
+      next(error);
     });
 };
+
+/*
+.catch(() => {
+  next(new UnauthorizedError('Необходима авторизация')); // неправильных почте и пароле
+});
+*/
 
 //
 module.exports = {
