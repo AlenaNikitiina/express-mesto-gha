@@ -2,16 +2,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { celebrate, Joi } = require('celebrate'); // ошибки библиотека для валидации данных
+
+// const { celebrate, Joi } = require('celebrate'); // ошибки библиотека для валидации данных
 const { errors } = require('celebrate'); // будет обрабатывать ток ошибки, которые сгенерировал celebrate
 const { PORT, SERVER_ADDRESS } = require('./config');
 
-const usersRouter = require('./routes/users');
-const cardsRouter = require('./routes/cards');
+const router = require('./routes/index'); // тут все роуты
 
-const { createUser, login } = require('./controllers/users');
-const auth = require('./middlewares/auth');
-// const escape = require('escape-html');
+// const usersRouter = require('./routes/users');
+// const cardsRouter = require('./routes/cards');
+
+// const { createUser, login } = require('./controllers/users');
+// const auth = require('./middlewares/auth');
 
 // создаем приложение
 const app = express();
@@ -19,6 +21,9 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use(router); // Здесь роутинг
+
+/*
 // // Здесь роутинг :
 // роут для логина
 app.post('/signin', celebrate({
@@ -35,16 +40,18 @@ app.post('/signup', celebrate({
     password: Joi.string().required().min(2),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().regex(/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/),
+    avatar: Joi.string().regex(/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/),
   }),
 }), createUser);
 
 app.use('/', auth, usersRouter); // запускаем. передали ф своим обработчикам запроса
 app.use('/', auth, cardsRouter);
 
-app.use((req, res) => {
-  res.status(404).send({ message: 'Несуществующая страница.' });
+app.use((req, res, next) => {
+  next(new NotFoundError('Несуществующая страница.'));
+  // res.status(404).send({ message: 'Несуществующая страница.' });
 });
+*/
 
 // обработчик ошибок celebrate
 app.use(errors());
