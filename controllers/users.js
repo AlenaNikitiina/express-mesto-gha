@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken'); // импортируем модуль json
 const User = require('../models/user'); // модель
 const NotFoundError = require('../errors/NotFoundError'); // 404
 const BadRequestError = require('../errors/BadRequestError'); // 400
+const ConflictError = require('../errors/ConflictError'); // 409
 
 const { JWT_SECRET } = require('../config');
 
@@ -34,7 +35,7 @@ const createUser = (req, res, next) => {
       if (error.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
       } else if (error.code === 11000 || error.name === 'MongoServerError') {
-        res.status(409).send({ message: 'Пользователь с такими данными уже существует', error });
+        next(new ConflictError('Пользователь с такими данными уже существует.'));
       } else {
         next(error);
       }
