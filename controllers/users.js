@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken'); // импортируем модуль json
 const User = require('../models/user'); // модель
 const NotFoundError = require('../errors/NotFoundError'); // 404
 const BadRequestError = require('../errors/BadRequestError'); // 400
+const ConflictError = require('../errors/ConflictError'); // 409
+const UnauthorizedError = require('../errors/UnauthorizedError'); // 401
 
 const { JWT_SECRET } = require('../config');
 
@@ -34,7 +36,7 @@ const createUser = (req, res, next) => {
       if (error.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
       } else if (error.code === 11000 || error.name === 'MongoServerError') {
-        res.status(409).send({ message: 'Пользователь с такими данными уже существует', error });
+        next(new ConflictError('Пользователь с такими данными уже существует.'));
       } else {
         next(error);
       }
@@ -64,10 +66,8 @@ const getUser = (req, res, next) => {
       res.status(200).send(user);
     })
     .catch((error) => {
-      if (error.statusCode === 400 || error.name === 'CastError') {
+      if (error.name === 'CastError') {
         next(new BadRequestError('Пользователь по указанному _id не найден.'));
-      } else if (error.statusCode === 404) {
-        next(new NotFoundError('Получение пользователя с некорректным id'));
       } else {
         next(error);
       }
@@ -78,13 +78,7 @@ const getUser = (req, res, next) => {
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send(users))
-    .catch((error) => {
-      if (error.statusCode === 400 || error.name === 'CastError') {
-        next(new BadRequestError('Переданы некорректные данные.'));
-      } else {
-        next(error);
-      }
-    });
+    .catch(next);
 };
 
 // обновляет аватар.  PATCH /users/me/avatar
@@ -99,7 +93,7 @@ const updateUserAvatar = (req, res, next) => {
       res.status(200).send(user); // send({ data: users }))
     })
     .catch((error) => {
-      if (error.statusCode === 400 || error.name === 'CastError') {
+      if (error.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
       } else {
         next(error);
@@ -118,7 +112,7 @@ const updateUser = (req, res, next) => {
     .then((users) => res.send({ data: users }))
     .catch((error) => {
       // console.log("name error:", error.name, ", code:", error.statusCode);
-      if (error.statusCode === 400 || error.name === 'CastError' || error.name === 'ValidationError') {
+      if (error.name === 'CastError' || error.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении профиля.'));
       } else {
         next(error);
@@ -128,7 +122,7 @@ const updateUser = (req, res, next) => {
 
 // Создаём контроллер аутентификации
 // Если почта и пароль совпадают с теми, что есть в базе, чел входит на сайт
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -136,8 +130,8 @@ const login = (req, res) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' }); // создадим токен
       res.send({ token }); // аутентификация успешна
     })
-    .catch((error) => {
-      res.status(401).send({ message: error.message }); // 403 ? неправильных почте и пароле
+    .catch(() => {
+      next(new UnauthorizedError('Необходима авторизация')); // неправильных почте и пароле
     });
 };
 
