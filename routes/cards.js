@@ -1,7 +1,7 @@
 const { celebrate, Joi } = require('celebrate');
 const cardsRouter = require('express').Router(); // создали роутер
 
-// const URL_CHECK = require('../utils/isUrl');
+const { URL_CHECK } = require('../utils/isUrl');
 
 const {
   getCards, createCard, likeCard, dislikeCard, deleteCard,
@@ -11,7 +11,7 @@ const {
 cardsRouter.post('/cards', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
-    link: Joi.string().required().regex(/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/),
+    link: Joi.string().required().regex(URL_CHECK),
   }),
 }), createCard);
 
