@@ -65,10 +65,8 @@ const getUser = (req, res, next) => {
       res.status(200).send(user);
     })
     .catch((error) => {
-      if (error.statusCode === 400 || error.name === 'CastError') {
+      if (error.name === 'CastError') {
         next(new BadRequestError('Пользователь по указанному _id не найден.'));
-      } else if (error.statusCode === 404) {
-        next(new NotFoundError('Получение пользователя с некорректным id'));
       } else {
         next(error);
       }
@@ -79,13 +77,7 @@ const getUser = (req, res, next) => {
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send(users))
-    .catch((error) => {
-      if (error.statusCode === 400 || error.name === 'CastError') {
-        next(new BadRequestError('Переданы некорректные данные.'));
-      } else {
-        next(error);
-      }
-    });
+    .catch(next);
 };
 
 // обновляет аватар.  PATCH /users/me/avatar
@@ -100,7 +92,7 @@ const updateUserAvatar = (req, res, next) => {
       res.status(200).send(user); // send({ data: users }))
     })
     .catch((error) => {
-      if (error.statusCode === 400 || error.name === 'CastError') {
+      if (error.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
       } else {
         next(error);
@@ -119,7 +111,7 @@ const updateUser = (req, res, next) => {
     .then((users) => res.send({ data: users }))
     .catch((error) => {
       // console.log("name error:", error.name, ", code:", error.statusCode);
-      if (error.statusCode === 400 || error.name === 'CastError' || error.name === 'ValidationError') {
+      if (error.name === 'CastError' || error.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении профиля.'));
       } else {
         next(error);
@@ -129,7 +121,7 @@ const updateUser = (req, res, next) => {
 
 // Создаём контроллер аутентификации
 // Если почта и пароль совпадают с теми, что есть в базе, чел входит на сайт
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -138,7 +130,7 @@ const login = (req, res) => {
       res.send({ token }); // аутентификация успешна
     })
     .catch((error) => {
-      res.status(401).send({ message: error.message }); // 403 ? неправильных почте и пароле
+      next(error); // or 403 ? неправильных почте и пароле
     });
 };
 
