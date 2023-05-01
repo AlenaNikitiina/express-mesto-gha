@@ -4,10 +4,10 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
 const { errors } = require('celebrate'); // будет обрабатывать ток ошибки, которые сгенерировал celebrate
+const handleErrors = require('./middlewares/handleErrors');
 const { PORT, SERVER_ADDRESS } = require('./config');
 
 const router = require('./routes/index'); // тут все роуты
-const handleErrors = require('./middlewares/handleErrors');
 
 // создаем приложение
 const app = express();

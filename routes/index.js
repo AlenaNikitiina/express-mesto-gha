@@ -7,7 +7,8 @@ const cardsRouter = require('./cards');
 const { createUser, login } = require('../controllers/users');
 const auth = require('../middlewares/auth');
 const NotFoundError = require('../errors/NotFoundError'); // 404
-const URL_CHECK = require('../config');
+
+// const URL_CHECK = require('../utils/isUrl');
 
 // // Здесь роутинг :
 
@@ -26,17 +27,15 @@ router.post('/signup', celebrate({
     password: Joi.string().required().min(2),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().regex(URL_CHECK),
+    avatar: Joi.string().required().regex(/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/),
   }),
 }), createUser);
 
 router.use(auth); // ниже все будут защищены авторизацией
-
 router.use('/', usersRouter); // запускаем. передали ф своим обработчикам запроса
 router.use('/', cardsRouter);
-
 // неизвестного маршрута
-router.use((req, res, next) => {
+router.use('*', (req, res, next) => {
   next(new NotFoundError('Несуществующая страница.'));
 });
 

@@ -1,7 +1,7 @@
 // это файл маршрутa user, сюда приходят запросы от пользователей
 const usersRouter = require('express').Router(); // создали роутер
 const { celebrate, Joi } = require('celebrate');
-const URL_CHECK = require('../config');
+// const URL_CHECK = require('../utils/isUrl');
 
 const {
   getUser, getUsers, updateUserAvatar, updateUser, getCurrentUserMe,
@@ -29,7 +29,7 @@ usersRouter.patch('/users/me', celebrate({
 // обновляет аватар
 usersRouter.patch('/users/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().regex(URL_CHECK),
+    avatar: Joi.string().required().regex(/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/),
   }),
 }), updateUserAvatar);
 
