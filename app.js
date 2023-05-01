@@ -23,7 +23,7 @@ app.use(handleErrors); // централизованный обработчик 
 // подключаемся к серверу mongo
 mongoose.connect(SERVER_ADDRESS)
   .then(() => console.log('Успешное подключение к MongoDB'))
-  .catch((err) => console.error('Ошибка подключения:', err));
+  .catch((error) => console.error('Ошибка подключения:', error));
 
 //
 app.listen(PORT, () => {
